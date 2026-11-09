@@ -127,7 +127,7 @@
     </div>
 
     <div id="send-modal" class="modal-overlay hidden">
-      <div class="modal-card card">
+      <div class="modal-card card send-card">
         <button id="send-modal-close" class="modal-close-btn">&times;</button>
         <div class="modal-header">
           <h3 id="send-modal-title">Envoyer à ...</h3>
@@ -141,10 +141,20 @@
             <input type="file" id="file-input" style="display: none;" multiple />
           </div>
 
-          <div id="selected-file-badge" class="selected-file-badge hidden">
-            <span class="file-name-text">filename.pdf</span>
-            <button id="cancel-file-btn" class="cancel-file-btn">&times;</button>
+          <div id="selected-files" class="selected-files hidden">
+            <div class="selected-files-header">
+              <span id="selected-files-summary" class="files-summary"></span>
+              <button id="clear-files-btn" class="link-btn" type="button" data-i18n="clearAll">Tout retirer</button>
+            </div>
+            <div id="selected-files-grid" class="file-grid file-grid-compact"></div>
           </div>
+        </div>
+        <div id="upload-progress" class="upload-progress hidden">
+          <div class="upload-progress-text">
+            <span id="upload-progress-label"></span>
+            <span id="upload-progress-percent"></span>
+          </div>
+          <div class="progress-track"><div id="upload-progress-bar" class="progress-bar"></div></div>
         </div>
         <div class="modal-footer">
           <button id="send-btn" class="primary-btn" disabled>
@@ -156,12 +166,21 @@
     </div>
 
     <div id="received-modal" class="modal-overlay hidden">
-      <div class="modal-card card popup-card">
+      <div class="modal-card card popup-card received-card">
         <button id="received-modal-close" class="modal-close-btn">&times;</button>
-        <div class="modal-header">
-          <h3 id="received-modal-title" data-i18n="newShare">Nouveau partage</h3>
+        <div class="modal-header received-header">
+          <div class="received-header-text">
+            <h3 id="received-modal-title" data-i18n="newShare">Nouveau partage</h3>
+            <p id="received-modal-subtitle" class="modal-subtitle"></p>
+          </div>
+          <button id="download-all-btn" class="secondary-btn hidden" type="button">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><path d="m7 10 5 5 5-5"/><path d="M12 15V3"/></svg>
+            <span data-i18n="downloadAll">Tout télécharger</span>
+          </button>
         </div>
         <div class="modal-body" id="received-modal-body">
+          <div id="received-texts" class="received-texts"></div>
+          <div id="received-grid" class="file-grid"></div>
         </div>
         <div class="modal-footer">
           <button id="received-close-btn" class="primary-btn">
@@ -213,6 +232,32 @@
           <button id="trouble-close-btn" class="primary-btn" data-i18n="close">Fermer</button>
         </div>
       </div>
+    </div>
+
+    <div id="lightbox" class="lightbox hidden" role="dialog" aria-modal="true">
+      <div class="lightbox-topbar">
+        <span id="lightbox-caption" class="lightbox-caption"></span>
+        <div class="lightbox-actions">
+          <a id="lightbox-download" class="lightbox-btn" href="#" download data-i18n-title="download" title="Télécharger">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><path d="m7 10 5 5 5-5"/><path d="M12 15V3"/></svg>
+          </a>
+          <button id="lightbox-close" class="lightbox-btn" type="button" data-i18n-title="close" title="Fermer">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg>
+          </button>
+        </div>
+      </div>
+      <button id="lightbox-prev" class="lightbox-nav lightbox-prev" type="button" aria-label="Previous">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m15 18-6-6 6-6"/></svg>
+      </button>
+      <div id="lightbox-stage" class="lightbox-stage"></div>
+      <button id="lightbox-next" class="lightbox-nav lightbox-next" type="button" aria-label="Next">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m9 18 6-6-6-6"/></svg>
+      </button>
+    </div>
+
+    <div id="toast" class="toast hidden" role="status">
+      <span id="toast-text"></span>
+      <button id="toast-action" class="toast-action hidden" type="button"></button>
     </div>
 
   </div>

@@ -1,4 +1,16 @@
 const it = {
+  fileOne: "1 file",
+  fileMany: "{n} file",
+  downloadAll: "Scarica tutto",
+  clearAll: "Rimuovi tutto",
+  sending: "Invio",
+  uploadFailed: "Invio non riuscito",
+  uploadFailedShort: "Errore",
+  retryHint: "clicca Condividi per riprovare",
+  from: "Da",
+  sizeUnits: "B,KB,MB,GB,TB",
+  savedToDownloads: "salvato in Download",
+  showInFolder: "Mostra",
   connecting: "Connessione...",
   connected: "Connesso",
   disconnected: "Disconnesso",
@@ -36,6 +48,6 @@ const it = {
   troubleIntro: "Se l'altro dispositivo non carica la pagina, controlla quanto segue:",
   troubleItem1: '<svg class="trouble-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20h.01"/><path d="M8.5 16.5a5 5 0 0 1 7 0"/><path d="M5 13a10 10 0 0 1 14 0"/><path d="M1.5 9.5a15 15 0 0 1 21 0"/></svg><div><strong>Stessa rete Wi-Fi</strong>: Assicurati che entrambi i dispositivi siano connessi alla stessa rete locale o Wi-Fi.</div>',
   troubleItem2: '<svg class="trouble-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="18" height="12" x="3" y="4" rx="2" ry="2"/><line x1="2" x2="22" y1="20" y2="20"/><line x1="5" x2="19" y1="16" y2="16"/><line x1="12" x2="12" y1="16" y2="20"/></svg><div><strong>Mac e iPhone (Rete locale)</strong>: Su macOS/iOS, assicurati che l\'accesso alla "Rete locale" sia abilitato per il browser (Impostazioni di Sistema > Privacy e sicurezza > Rete locale).</div>',
-  troubleItem3: '<svg class="trouble-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg><div><strong>Firewall/VPN</strong>: Disabilita temporaneamente qualsiasi VPN o firewall attivo sul computer host che possa bloccare le connessioni in entrata sulla porta 3000.</div>',
+  troubleItem3: '<svg class="trouble-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg><div><strong>Firewall/VPN</strong>: Disabilita temporaneamente qualsiasi VPN o firewall attivo sul computer host che possa bloccare le connessioni in entrata sulla porta {port}.</div>',
   troubleItem4: '<svg class="trouble-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M12 2a14.5 14.5 0 0 0 0 20 14.5 14.5 0 0 0 0-20"/><path d="M2 12h20"/></svg><div><strong>Indirizzo IP</strong>: Il computer host deve essere attivo e il server in esecuzione. Se il router ha cambiato l\'IP locale, riavvia il server.</div>'
 };

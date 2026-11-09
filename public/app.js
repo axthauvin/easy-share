@@ -25,16 +25,43 @@ const sendModalTitle = document.getElementById("send-modal-title");
 const textInput = document.getElementById("text-input");
 const fileInput = document.getElementById("file-input");
 const modalDropZone = document.getElementById("modal-drop-zone");
-const selectedFileBadge = document.getElementById("selected-file-badge");
-const fileNameText = selectedFileBadge.querySelector(".file-name-text");
-const cancelFileBtn = document.getElementById("cancel-file-btn");
+const selectedFilesBox = document.getElementById("selected-files");
+const selectedFilesSummary = document.getElementById("selected-files-summary");
+const selectedFilesGrid = document.getElementById("selected-files-grid");
+const clearFilesBtn = document.getElementById("clear-files-btn");
+const uploadProgress = document.getElementById("upload-progress");
+const uploadProgressLabel = document.getElementById("upload-progress-label");
+const uploadProgressPercent = document.getElementById(
+  "upload-progress-percent",
+);
+const uploadProgressBar = document.getElementById("upload-progress-bar");
 const sendBtn = document.getElementById("send-btn");
+const sendBtnLabel = sendBtn.querySelector("span");
+const sendCard = sendModal.querySelector(".modal-card");
 
 const receivedModal = document.getElementById("received-modal");
 const receivedModalClose = document.getElementById("received-modal-close");
 const receivedModalTitle = document.getElementById("received-modal-title");
+const receivedModalSubtitle = document.getElementById(
+  "received-modal-subtitle",
+);
 const receivedModalBody = document.getElementById("received-modal-body");
+const receivedTexts = document.getElementById("received-texts");
+const receivedGrid = document.getElementById("received-grid");
+const downloadAllBtn = document.getElementById("download-all-btn");
 const receivedCloseBtn = document.getElementById("received-close-btn");
+
+const lightbox = document.getElementById("lightbox");
+const lightboxStage = document.getElementById("lightbox-stage");
+const lightboxCaption = document.getElementById("lightbox-caption");
+const lightboxDownload = document.getElementById("lightbox-download");
+const lightboxClose = document.getElementById("lightbox-close");
+const lightboxPrev = document.getElementById("lightbox-prev");
+const lightboxNext = document.getElementById("lightbox-next");
+
+const toast = document.getElementById("toast");
+const toastText = document.getElementById("toast-text");
+const toastAction = document.getElementById("toast-action");
 
 const aboutModal = document.getElementById("about-modal");
 const aboutTriggerBtn = document.getElementById("about-trigger-btn");
@@ -78,6 +105,9 @@ const checkSvg = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fi
 const monitorSvg = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-monitor"><rect width="20" height="14" x="2" y="3" rx="2"/><line x1="8" x2="16" y1="21" y2="21"/><line x1="12" x2="12" y1="17" y2="21"/></svg>`;
 const smartphoneSvg = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-smartphone"><rect width="14" height="20" x="5" y="2" rx="2" ry="2"/><path d="M12 18h.01"/></svg>`;
 const fileSvg = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-file"><path d="M15 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7Z"/><path d="M14 2v4a2 2 0 0 0 2 2h4"/></svg>`;
+const downloadSvg = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><path d="m7 10 5 5 5-5"/><path d="M12 15V3"/></svg>`;
+const playSvg = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor"><path d="M7 4v16l13-8z"/></svg>`;
+const xSvg = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg>`;
 
 function getTranslation(key) {
   if (i18n[currentLang] && i18n[currentLang][key]) {
@@ -117,8 +147,18 @@ function applyLanguage(lang) {
 
   document.querySelectorAll("[data-i18n-html]").forEach((el) => {
     const key = el.getAttribute("data-i18n-html");
-    el.innerHTML = getTranslation(key);
+    el.innerHTML = getTranslation(key).replace(
+      "{port}",
+      window.location.port || "80",
+    );
   });
+
+  document.querySelectorAll("[data-i18n-title]").forEach((el) => {
+    el.setAttribute("title", getTranslation(el.getAttribute("data-i18n-title")));
+  });
+
+  if (selectedFiles.length > 0) updateSelectedSummary();
+  if (!receivedModal.classList.contains("hidden")) updateReceivedHeader();
 
   if (!sendModal.classList.contains("hidden") && activeTargetId) {
     const activeClient = connectedClients.find((c) => c.id === activeTargetId);
@@ -295,79 +335,168 @@ function setupDragAndDropOnBubble(bubbleElement, targetId) {
   });
 }
 
-async function sendDroppedFiles(files, targetId) {
-  for (let i = 0; i < files.length; i++) {
-    await sendDroppedFile(files[i], targetId, i + 1, files.length);
-  }
+/* ---------------------------------------------------------
+   File helpers
+   --------------------------------------------------------- */
+
+function newFileId() {
+  return (
+    "f_" + Date.now().toString(36) + Math.random().toString(36).substring(2, 7)
+  );
 }
 
-async function sendDroppedFile(file, targetId, index = null, total = null) {
+function getFileExt(name) {
+  const match = /\.([a-z0-9]{1,6})$/i.exec(name || "");
+  return match ? match[1].toUpperCase() : "";
+}
+
+function getFileKind(type, name) {
+  const mime = (type || "").toLowerCase();
+  const ext = getFileExt(name).toLowerCase();
+  if (mime.startsWith("image/")) return "image";
+  if (mime.startsWith("video/")) return "video";
+  if (mime.startsWith("audio/")) return "audio";
+  if (mime === "application/pdf" || ext === "pdf") return "pdf";
+  if (["zip", "rar", "7z", "tar", "gz", "tgz", "bz2", "xz"].includes(ext))
+    return "archive";
+  if (
+    ["doc", "docx", "odt", "rtf", "txt", "md", "xls", "xlsx", "csv", "ppt", "pptx", "key", "pages"].includes(ext)
+  )
+    return "doc";
+  return "file";
+}
+
+function formatCount(n) {
+  return n === 1
+    ? getTranslation("fileOne")
+    : getTranslation("fileMany").replace("{n}", n);
+}
+
+function totalSize(list, getSize) {
+  return list.reduce((sum, item) => sum + (getSize(item) || 0), 0);
+}
+
+function thumbHtml(kind, url, name) {
+  if (kind === "image" && url) {
+    return `<img src="${url}" alt="" loading="lazy" decoding="async" />`;
+  }
+  if (kind === "video" && url) {
+    // #t=0.1 makes mobile Safari paint the first frame as a poster
+    return `<video src="${url}#t=0.1" preload="metadata" muted playsinline></video><span class="tile-play">${playSvg}</span>`;
+  }
+  const ext = getFileExt(name);
+  return `<div class="tile-icon">${fileSvg}${ext ? `<span class="tile-ext">${escapeHTML(ext)}</span>` : ""}</div>`;
+}
+
+/* Upload a single file with byte-level progress (fetch can't report upload progress). */
+function uploadFile(file, onProgress) {
+  return new Promise((resolve, reject) => {
+    const fileId = newFileId();
+    const xhr = new XMLHttpRequest();
+    xhr.open("POST", `/upload/${fileId}?name=${encodeURIComponent(file.name)}`);
+    xhr.setRequestHeader(
+      "Content-Type",
+      file.type || "application/octet-stream",
+    );
+    xhr.upload.onprogress = (e) => {
+      if (e.lengthComputable && onProgress) onProgress(e.loaded, e.total);
+    };
+    xhr.onload = () => {
+      if (xhr.status >= 200 && xhr.status < 300) resolve(fileId);
+      else reject(new Error(`Upload failed (${xhr.status})`));
+    };
+    xhr.onerror = () => reject(new Error("Network error"));
+    xhr.send(file);
+  });
+}
+
+function announceFile(file, fileId, targetId, text = "") {
+  if (!socket || socket.readyState !== WebSocket.OPEN) {
+    throw new Error("Not connected");
+  }
+  socket.send(
+    JSON.stringify({
+      type: "share_file",
+      targetId,
+      text,
+      fileName: file.name,
+      fileType: file.type || "application/octet-stream",
+      fileSize: file.size,
+      fileId,
+    }),
+  );
+}
+
+/* ---------------------------------------------------------
+   Drag & drop straight onto a device bubble
+   --------------------------------------------------------- */
+
+async function sendDroppedFiles(fileList, targetId) {
+  const files = Array.from(fileList);
   const bubble = document.querySelector(
     `.device-bubble[data-id="${targetId}"]`,
   );
-  let label, originalText;
-  if (bubble) {
-    label = bubble.querySelector(".device-label");
-    originalText = label.textContent;
-    if (index !== null && total !== null) {
-      label.textContent = `${getTranslation("loading")} (${index}/${total})`;
-    } else {
-      label.textContent = getTranslation("loading");
+  const label = bubble ? bubble.querySelector(".device-label") : null;
+  const node = bubble ? bubble.querySelector(".bubble-node") : null;
+  const originalText = label ? label.textContent : "";
+
+  const grandTotal = totalSize(files, (f) => f.size) || 1;
+  let doneBytes = 0;
+  let failed = 0;
+
+  const setProgress = (pct, text) => {
+    if (node) {
+      node.classList.add("uploading");
+      node.style.setProperty("--progress", pct.toFixed(1));
     }
-    label.style.color = "var(--warning-color)";
+    if (label) {
+      label.textContent = text;
+      label.style.color = "var(--primary-color)";
+    }
+  };
+
+  for (let i = 0; i < files.length; i++) {
+    const file = files[i];
+    const prefix =
+      files.length > 1
+        ? `${getTranslation("sending")} ${i + 1}/${files.length}`
+        : getTranslation("sending");
+    try {
+      const fileId = await uploadFile(file, (loaded) => {
+        const pct = ((doneBytes + loaded) / grandTotal) * 100;
+        setProgress(pct, `${prefix} · ${Math.floor(pct)} %`);
+      });
+      announceFile(file, fileId, targetId);
+    } catch (err) {
+      console.error(err);
+      failed++;
+    }
+    doneBytes += file.size;
   }
 
-  const fileId =
-    "f_" + Date.now().toString(36) + Math.random().toString(36).substring(2, 5);
-
-  try {
-    const response = await fetch(
-      `/upload/${fileId}?name=${encodeURIComponent(file.name)}`,
-      {
-        method: "POST",
-        headers: {
-          "Content-Type": file.type || "application/octet-stream",
-        },
-        body: file,
-      },
-    );
-
-    if (!response.ok) throw new Error("Upload failed");
-
-    if (socket && socket.readyState === WebSocket.OPEN) {
-      socket.send(
-        JSON.stringify({
-          type: "share_file",
-          targetId: targetId,
-          text: "",
-          fileName: file.name,
-          fileType: file.type || "application/octet-stream",
-          fileSize: file.size,
-          fileId: fileId,
-        }),
-      );
-
-      if (label) {
-        label.textContent = getTranslation("sendSuccess");
-        label.style.color = "var(--success-color)";
-        setTimeout(() => {
-          label.textContent = originalText;
-          label.style.color = "";
-        }, 2000);
-      }
-    }
-  } catch (err) {
-    console.error(err);
-    if (label) {
-      label.textContent = "Error!";
-      label.style.color = "var(--danger-color)";
-      setTimeout(() => {
-        label.textContent = originalText;
-        label.style.color = "";
-      }, 2000);
-    }
+  if (node) {
+    node.classList.remove("uploading");
+    node.style.removeProperty("--progress");
+  }
+  if (label) {
+    label.textContent =
+      failed === 0
+        ? getTranslation("sendSuccess")
+        : `${getTranslation("uploadFailed")} (${failed})`;
+    label.style.color =
+      failed === 0 ? "var(--success-color)" : "var(--danger-color)";
+    setTimeout(() => {
+      label.textContent = originalText;
+      label.style.color = "";
+    }, 2500);
   }
 }
+
+/* ---------------------------------------------------------
+   Send modal
+   --------------------------------------------------------- */
+
+let isSending = false;
 
 function openSendModal(targetId, targetName) {
   activeTargetId = targetId;
@@ -380,84 +509,217 @@ function openSendModal(targetId, targetName) {
   textInput.focus();
 }
 
-sendModalClose.addEventListener("click", () => {
+function closeSendModal() {
+  if (isSending) return;
   sendModal.classList.add("hidden");
-});
+}
+
+sendModalClose.addEventListener("click", closeSendModal);
+
+function fileKey(file) {
+  return `${file.name}|${file.size}|${file.lastModified}`;
+}
+
+function addFilesToSelection(fileList) {
+  if (isSending) return;
+  const existing = new Set(selectedFiles.map((item) => item.key));
+  Array.from(fileList).forEach((file) => {
+    const key = fileKey(file);
+    if (existing.has(key)) return;
+    existing.add(key);
+    const kind = getFileKind(file.type, file.name);
+    selectedFiles.push({
+      key,
+      file,
+      kind,
+      previewUrl:
+        kind === "image" || kind === "video" ? URL.createObjectURL(file) : null,
+      status: "pending",
+      tile: null,
+    });
+  });
+  fileInput.value = "";
+  renderSelectedFiles();
+  updateSendBtnState();
+}
+
+function removeSelectedFile(key) {
+  const item = selectedFiles.find((i) => i.key === key);
+  if (item && item.previewUrl) URL.revokeObjectURL(item.previewUrl);
+  selectedFiles = selectedFiles.filter((i) => i.key !== key);
+  renderSelectedFiles();
+  updateSendBtnState();
+}
+
+function clearFileSelection() {
+  selectedFiles.forEach((item) => {
+    if (item.previewUrl) URL.revokeObjectURL(item.previewUrl);
+  });
+  selectedFiles = [];
+  fileInput.value = "";
+  renderSelectedFiles();
+  hideUploadProgress();
+  updateSendBtnState();
+}
+
+function updateSelectedSummary() {
+  const size = totalSize(selectedFiles, (i) => i.file.size);
+  selectedFilesSummary.textContent = `${formatCount(selectedFiles.length)} · ${formatBytes(size)}`;
+}
+
+function renderSelectedFiles() {
+  selectedFilesGrid.innerHTML = "";
+  selectedFilesBox.classList.toggle("hidden", selectedFiles.length === 0);
+  sendCard.classList.toggle("has-files", selectedFiles.length > 0);
+  if (selectedFiles.length === 0) return;
+
+  updateSelectedSummary();
+
+  selectedFiles.forEach((item) => {
+    const tile = document.createElement("div");
+    tile.className = `file-tile is-${item.status}`;
+    tile.title = item.file.name;
+    tile.innerHTML = `
+      <div class="tile-thumb kind-${item.kind}">${thumbHtml(item.kind, item.previewUrl, item.file.name)}</div>
+      <div class="tile-meta">
+        <span class="tile-name">${escapeHTML(item.file.name)}</span>
+        <span class="tile-size">${formatBytes(item.file.size)}</span>
+      </div>
+      <div class="tile-progress"><div></div></div>
+      <button class="tile-remove" type="button" aria-label="Remove">${xSvg}</button>
+    `;
+    tile.querySelector(".tile-remove").addEventListener("click", (e) => {
+      e.stopPropagation();
+      removeSelectedFile(item.key);
+    });
+    item.tile = tile;
+    selectedFilesGrid.appendChild(tile);
+  });
+}
+
+function setTileStatus(item, status, pct) {
+  item.status = status;
+  if (!item.tile) return;
+  item.tile.className = `file-tile is-${status}`;
+  if (typeof pct === "number") {
+    item.tile.querySelector(".tile-progress > div").style.width = `${pct}%`;
+  }
+  if (status === "error") {
+    item.tile.querySelector(".tile-size").textContent =
+      getTranslation("uploadFailedShort");
+  }
+}
+
+function showUploadProgress(label, pct, isError = false) {
+  uploadProgress.classList.remove("hidden");
+  uploadProgress.classList.toggle("has-error", isError);
+  uploadProgressLabel.textContent = label;
+  uploadProgressPercent.textContent = isError ? "" : `${Math.floor(pct)} %`;
+  uploadProgressBar.style.width = `${pct}%`;
+}
+
+function hideUploadProgress() {
+  uploadProgress.classList.add("hidden");
+  uploadProgress.classList.remove("has-error");
+  uploadProgressBar.style.width = "0%";
+}
+
+function setSendingState(sending) {
+  isSending = sending;
+  sendCard.classList.toggle("sending", sending);
+  textInput.disabled = sending;
+  clearFilesBtn.disabled = sending;
+  updateSendBtnState();
+}
 
 async function sendModalPayload() {
+  if (isSending) return;
   const text = textInput.value.trim();
   if (!text && selectedFiles.length === 0) return;
+  if (!socket || socket.readyState !== WebSocket.OPEN) return;
 
-  if (socket && socket.readyState === WebSocket.OPEN) {
-    if (selectedFiles.length > 0) {
-      const originalBtnText = sendBtn.textContent;
-      sendBtn.disabled = true;
-
-      try {
-        for (let i = 0; i < selectedFiles.length; i++) {
-          const file = selectedFiles[i];
-          sendBtn.textContent = `${getTranslation("loading")} (${i + 1}/${selectedFiles.length})`;
-
-          const fileId =
-            "f_" +
-            Date.now().toString(36) +
-            Math.random().toString(36).substring(2, 5);
-
-          const response = await fetch(
-            `/upload/${fileId}?name=${encodeURIComponent(file.name)}`,
-            {
-              method: "POST",
-              headers: {
-                "Content-Type": file.type || "application/octet-stream",
-              },
-              body: file,
-            },
-          );
-
-          if (!response.ok) throw new Error("Upload failed");
-
-          socket.send(
-            JSON.stringify({
-              type: "share_file",
-              targetId: activeTargetId,
-              text: i === 0 ? text : "",
-              fileName: file.name,
-              fileType: file.type || "application/octet-stream",
-              fileSize: file.size,
-              fileId: fileId,
-            }),
-          );
-        }
-      } catch (err) {
-        console.error(err);
-        alert("Erreur lors du transfert des fichiers.");
-      } finally {
-        sendBtn.disabled = false;
-        sendBtn.textContent = originalBtnText;
-        clearFileSelection();
-      }
-    } else {
-      socket.send(
-        JSON.stringify({
-          type: "share_text",
-          targetId: activeTargetId,
-          text: text,
-        }),
-      );
-    }
-
+  if (selectedFiles.length === 0) {
+    socket.send(
+      JSON.stringify({
+        type: "share_text",
+        targetId: activeTargetId,
+        text: text,
+      }),
+    );
     sendModal.classList.add("hidden");
+    return;
   }
+
+  const queue = selectedFiles.filter((item) => item.status !== "done");
+  const grandTotal = totalSize(queue, (i) => i.file.size) || 1;
+  let doneBytes = 0;
+  let failed = 0;
+  let textSent = false;
+
+  setSendingState(true);
+  showUploadProgress(getTranslation("sending"), 0);
+
+  for (let i = 0; i < queue.length; i++) {
+    const item = queue[i];
+    const label = `${getTranslation("sending")} ${i + 1}/${queue.length}`;
+    setTileStatus(item, "uploading", 0);
+    if (item.tile) item.tile.scrollIntoView({ block: "nearest" });
+
+    try {
+      const fileId = await uploadFile(item.file, (loaded, total) => {
+        setTileStatus(item, "uploading", (loaded / total) * 100);
+        showUploadProgress(label, ((doneBytes + loaded) / grandTotal) * 100);
+      });
+      announceFile(item.file, fileId, activeTargetId, textSent ? "" : text);
+      textSent = true;
+      setTileStatus(item, "done", 100);
+    } catch (err) {
+      console.error(err);
+      failed++;
+      setTileStatus(item, "error");
+    }
+    doneBytes += item.file.size;
+  }
+
+  setSendingState(false);
+
+  if (failed === 0) {
+    showUploadProgress(getTranslation("sendSuccess"), 100);
+    setTimeout(() => {
+      sendModal.classList.add("hidden");
+      clearFileSelection();
+    }, 600);
+    return;
+  }
+
+  // keep only what failed so a second click retries just those
+  selectedFiles
+    .filter((item) => item.status === "done")
+    .forEach((item) => {
+      if (item.previewUrl) URL.revokeObjectURL(item.previewUrl);
+    });
+  selectedFiles = selectedFiles.filter((item) => item.status !== "done");
+  if (textSent) textInput.value = "";
+  renderSelectedFiles();
+  selectedFiles.forEach((item) => setTileStatus(item, "error"));
+  showUploadProgress(
+    `${getTranslation("uploadFailed")} (${failed}) — ${getTranslation("retryHint")}`,
+    100,
+    true,
+  );
+  updateSendBtnState();
 }
 
 function updateSendBtnState() {
   const isConnected = socket && socket.readyState === WebSocket.OPEN;
-  const hasContent = textInput.value.trim().length > 0 || selectedFiles.length > 0;
-  sendBtn.disabled = !isConnected || !hasContent;
+  const hasContent =
+    textInput.value.trim().length > 0 || selectedFiles.length > 0;
+  sendBtn.disabled = isSending || !isConnected || !hasContent;
 }
 
 textInput.addEventListener("input", updateSendBtnState);
 sendBtn.addEventListener("click", sendModalPayload);
+clearFilesBtn.addEventListener("click", clearFileSelection);
 
 textInput.addEventListener("keydown", (e) => {
   if ((e.metaKey || e.ctrlKey) && e.key === "Enter") {
@@ -467,13 +729,13 @@ textInput.addEventListener("keydown", (e) => {
 });
 
 modalDropZone.addEventListener("click", () => {
-  fileInput.click();
+  if (!isSending) fileInput.click();
 });
 
 fileInput.addEventListener("change", (e) => {
   const files = e.target.files;
   if (files && files.length > 0) {
-    handleModalSelectedFiles(files);
+    addFilesToSelection(files);
   }
 });
 
@@ -504,102 +766,138 @@ fileInput.addEventListener("change", (e) => {
 modalDropZone.addEventListener("drop", (e) => {
   const files = e.dataTransfer.files;
   if (files && files.length > 0) {
-    handleModalSelectedFiles(files);
+    addFilesToSelection(files);
   }
 });
 
-function handleModalSelectedFiles(files) {
-  selectedFiles = Array.from(files);
-  if (selectedFiles.length > 0) {
-    if (selectedFiles.length === 1) {
-      fileNameText.textContent = selectedFiles[0].name;
-    } else {
-      fileNameText.textContent = `${selectedFiles.length} fichiers sélectionnés`;
-    }
-    selectedFileBadge.classList.remove("hidden");
+// Dropping anywhere on the open send card adds files too
+sendCard.addEventListener("dragover", (e) => e.preventDefault());
+sendCard.addEventListener("drop", (e) => {
+  e.preventDefault();
+  if (e.dataTransfer.files && e.dataTransfer.files.length > 0) {
+    addFilesToSelection(e.dataTransfer.files);
   }
-  updateSendBtnState();
+});
+
+// Never let a stray drop navigate the window away to the file
+window.addEventListener("dragover", (e) => e.preventDefault());
+window.addEventListener("drop", (e) => e.preventDefault());
+
+/* ---------------------------------------------------------
+   Received modal: texts + file gallery
+   --------------------------------------------------------- */
+
+let receivedFiles = [];
+let receivedTextCount = 0;
+let receivedSenders = new Set();
+
+function resetReceived() {
+  receivedTexts.innerHTML = "";
+  receivedGrid.innerHTML = "";
+  receivedFiles = [];
+  receivedTextCount = 0;
+  receivedSenders = new Set();
 }
 
-cancelFileBtn.addEventListener("click", clearFileSelection);
+function updateReceivedHeader() {
+  receivedModalTitle.textContent = getTranslation("newShare");
+  const parts = [];
+  if (receivedSenders.size > 0) {
+    parts.push(`${getTranslation("from")} ${Array.from(receivedSenders).join(", ")}`);
+  }
+  if (receivedFiles.length > 0) {
+    parts.push(formatCount(receivedFiles.length));
+    parts.push(formatBytes(totalSize(receivedFiles, (m) => m.fileSize)));
+  }
+  receivedModalSubtitle.textContent = parts.join(" · ");
+  downloadAllBtn.classList.toggle("hidden", receivedFiles.length < 2);
+}
 
-function clearFileSelection() {
-  selectedFiles = [];
-  fileInput.value = "";
-  selectedFileBadge.classList.add("hidden");
-  updateSendBtnState();
+function downloadUrl(message) {
+  return `/download/${message.fileId}`;
+}
+
+function triggerDownload(message) {
+  const a = document.createElement("a");
+  a.href = downloadUrl(message);
+  a.download = message.fileName || "file";
+  document.body.appendChild(a);
+  a.click();
+  a.remove();
+}
+
+function createTextCard(text, withCopy = true) {
+  const card = document.createElement("div");
+  card.className = "text-card";
+  card.innerHTML = `
+    <div class="received-text-body">${escapeHTML(text)}</div>
+    ${withCopy ? `<div class="received-actions"><button class="action-btn-small copy-btn">${getTranslation("copyText")}</button></div>` : ""}
+  `;
+  const copyBtn = card.querySelector(".copy-btn");
+  if (copyBtn) {
+    copyBtn.addEventListener("click", () => copyTextToClipboard(text, copyBtn));
+  }
+  return card;
+}
+
+function createReceivedTile(message) {
+  const url = downloadUrl(message);
+  const kind = getFileKind(message.fileType, message.fileName);
+  const isMedia = kind === "image" || kind === "video";
+
+  const tile = document.createElement("div");
+  tile.className = "file-tile";
+  tile.innerHTML = `
+    <button class="tile-thumb kind-${kind}" type="button" title="${escapeHTML(message.fileName)}">
+      ${thumbHtml(kind, url, message.fileName)}
+    </button>
+    <div class="tile-meta">
+      <span class="tile-name" title="${escapeHTML(message.fileName)}">${escapeHTML(message.fileName)}</span>
+      <span class="tile-size">${formatBytes(message.fileSize)}</span>
+    </div>
+    <a class="tile-action" href="${url}" download="${escapeHTML(message.fileName)}" title="${getTranslation("download")}">${downloadSvg}</a>
+  `;
+
+  tile.querySelector(".tile-thumb").addEventListener("click", () => {
+    if (isMedia) openLightbox(message);
+    else triggerDownload(message);
+  });
+
+  return tile;
 }
 
 function showReceivedPopup(message) {
-  receivedModalTitle.textContent = getTranslation("newShare");
-
-  const isModalHidden = receivedModal.classList.contains("hidden");
-  if (isModalHidden) {
-    receivedModalBody.innerHTML = "";
+  if (receivedModal.classList.contains("hidden")) {
+    resetReceived();
     receivedModal.classList.remove("hidden");
+    receivedModalBody.scrollTop = 0;
   }
 
-  const shareItem = document.createElement("div");
-  shareItem.className = "received-share-item";
-  shareItem.style.borderBottom = "1px solid var(--card-border)";
-  shareItem.style.paddingBottom = "1rem";
-  shareItem.style.marginBottom = "1rem";
+  if (message.sender) receivedSenders.add(message.sender);
 
   if (message.type === "file") {
-    const fileDownloadUrl = `/download/${message.fileId}`;
-    const sizeStr = formatBytes(message.fileSize);
-
-    if (message.fileType.startsWith("image/")) {
-      shareItem.innerHTML = `
-        ${message.text ? `<p style="margin-bottom: 0.75rem; font-size: 0.95rem;">${escapeHTML(message.text)}</p>` : ""}
-        <img src="${fileDownloadUrl}" class="received-image-preview" alt="Image" onclick="window.open('${fileDownloadUrl}')" />
-        <div class="received-actions" style="margin-top: 0.5rem;">
-          <a class="action-btn-small" href="${fileDownloadUrl}" download="${escapeHTML(message.fileName)}" target="_blank">${getTranslation("saveImage")}</a>
-        </div>
-      `;
-    } else {
-      shareItem.innerHTML = `
-        ${message.text ? `<p style="margin-bottom: 0.75rem; font-size: 0.95rem;">${escapeHTML(message.text)}</p>` : ""}
-        <div class="received-file-card">
-          <div class="received-file-icon">${fileSvg}</div>
-          <div class="received-file-info">
-            <span class="received-file-name" title="${escapeHTML(message.fileName)}">${escapeHTML(message.fileName)}</span>
-            <span class="received-file-size">${sizeStr}</span>
-          </div>
-        </div>
-        <div class="received-actions" style="margin-top: 0.5rem;">
-          <a class="action-btn-small" href="${fileDownloadUrl}" download="${escapeHTML(message.fileName)}" target="_blank">${getTranslation("download")}</a>
-        </div>
-      `;
+    if (message.text) {
+      receivedTexts.appendChild(createTextCard(message.text));
+      receivedTextCount++;
     }
+    receivedFiles.push(message);
+    receivedGrid.appendChild(createReceivedTile(message));
   } else {
-    shareItem.innerHTML = `
-      <div class="received-text-body">${escapeHTML(message.text)}</div>
-      <div class="received-actions" style="margin-top: 0.5rem;">
-        <button class="action-btn-small copy-btn">${getTranslation("copyText")}</button>
-      </div>
-    `;
-
-    const copyBtn = shareItem.querySelector(".copy-btn");
-    copyBtn.addEventListener("click", () => {
-      copyTextToClipboard(message.text, copyBtn);
-    });
+    receivedTexts.appendChild(createTextCard(message.text));
+    receivedTextCount++;
   }
 
-  if (receivedModalBody.children.length > 0) {
-    const prevItems = receivedModalBody.querySelectorAll(".received-share-item");
-    if (prevItems.length > 0) {
-      prevItems[prevItems.length - 1].style.borderBottom = "1px solid var(--card-border)";
-      prevItems[prevItems.length - 1].style.paddingBottom = "1rem";
-      prevItems[prevItems.length - 1].style.marginBottom = "1rem";
-    }
-  }
-  shareItem.style.borderBottom = "none";
-  shareItem.style.paddingBottom = "0";
-  shareItem.style.marginBottom = "0";
-
-  receivedModalBody.appendChild(shareItem);
+  updateReceivedHeader();
 }
+
+downloadAllBtn.addEventListener("click", async () => {
+  const files = receivedFiles.slice();
+  for (const message of files) {
+    triggerDownload(message);
+    // browsers drop rapid-fire downloads; space them out a little
+    await new Promise((r) => setTimeout(r, 350));
+  }
+});
 
 receivedModalClose.addEventListener("click", () => {
   receivedModal.classList.add("hidden");
@@ -607,6 +905,139 @@ receivedModalClose.addEventListener("click", () => {
 receivedCloseBtn.addEventListener("click", () => {
   receivedModal.classList.add("hidden");
 });
+
+/* ---------------------------------------------------------
+   Lightbox (images & videos)
+   --------------------------------------------------------- */
+
+let lightboxItems = [];
+let lightboxIndex = 0;
+
+function openLightbox(message) {
+  lightboxItems = receivedFiles.filter((m) => {
+    const kind = getFileKind(m.fileType, m.fileName);
+    return kind === "image" || kind === "video";
+  });
+  lightboxIndex = Math.max(0, lightboxItems.indexOf(message));
+  renderLightbox();
+  lightbox.classList.remove("hidden");
+}
+
+function renderLightbox() {
+  const message = lightboxItems[lightboxIndex];
+  if (!message) return;
+  const url = downloadUrl(message);
+  const kind = getFileKind(message.fileType, message.fileName);
+
+  lightboxStage.innerHTML =
+    kind === "video"
+      ? `<video src="${url}" controls autoplay playsinline></video>`
+      : `<img src="${url}" alt="${escapeHTML(message.fileName)}" />`;
+
+  const counter =
+    lightboxItems.length > 1
+      ? `${lightboxIndex + 1}/${lightboxItems.length} · `
+      : "";
+  lightboxCaption.textContent = `${counter}${message.fileName} · ${formatBytes(message.fileSize)}`;
+  lightboxDownload.href = url;
+  lightboxDownload.setAttribute("download", message.fileName || "file");
+
+  const multi = lightboxItems.length > 1;
+  lightboxPrev.classList.toggle("hidden", !multi);
+  lightboxNext.classList.toggle("hidden", !multi);
+}
+
+function stepLightbox(delta) {
+  if (lightboxItems.length < 2) return;
+  lightboxIndex =
+    (lightboxIndex + delta + lightboxItems.length) % lightboxItems.length;
+  renderLightbox();
+}
+
+function closeLightbox() {
+  lightbox.classList.add("hidden");
+  lightboxStage.innerHTML = ""; // stops any playing video
+}
+
+lightboxClose.addEventListener("click", closeLightbox);
+lightboxPrev.addEventListener("click", () => stepLightbox(-1));
+lightboxNext.addEventListener("click", () => stepLightbox(1));
+lightbox.addEventListener("click", (e) => {
+  if (e.target === lightbox || e.target === lightboxStage) closeLightbox();
+});
+
+// basic swipe on touch screens
+let touchStartX = null;
+lightbox.addEventListener(
+  "touchstart",
+  (e) => {
+    touchStartX = e.touches[0].clientX;
+  },
+  { passive: true },
+);
+lightbox.addEventListener("touchend", (e) => {
+  if (touchStartX === null) return;
+  const dx = e.changedTouches[0].clientX - touchStartX;
+  touchStartX = null;
+  if (Math.abs(dx) > 50) stepLightbox(dx < 0 ? 1 : -1);
+});
+
+document.addEventListener("keydown", (e) => {
+  if (!lightbox.classList.contains("hidden")) {
+    if (e.key === "Escape") closeLightbox();
+    else if (e.key === "ArrowRight") stepLightbox(1);
+    else if (e.key === "ArrowLeft") stepLightbox(-1);
+    return;
+  }
+  if (e.key === "Escape") {
+    if (!receivedModal.classList.contains("hidden")) {
+      receivedModal.classList.add("hidden");
+    } else if (!sendModal.classList.contains("hidden")) {
+      closeSendModal();
+    }
+  }
+});
+
+/* ---------------------------------------------------------
+   Toast (desktop app: "saved to Downloads")
+   --------------------------------------------------------- */
+
+let toastTimer = null;
+
+function showToast(text, actionLabel, action) {
+  toastText.textContent = text;
+  if (actionLabel && action) {
+    toastAction.textContent = actionLabel;
+    toastAction.onclick = action;
+    toastAction.classList.remove("hidden");
+  } else {
+    toastAction.classList.add("hidden");
+    toastAction.onclick = null;
+  }
+  toast.classList.remove("hidden");
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(() => toast.classList.add("hidden"), 5000);
+}
+
+if (window.easyShareDesktop) {
+  let savedBatch = 0;
+  let savedBatchTimer = null;
+  window.easyShareDesktop.onDownloadDone((info) => {
+    if (info.state !== "completed") {
+      showToast(`${getTranslation("uploadFailedShort")} : ${info.fileName}`);
+      return;
+    }
+    savedBatch++;
+    clearTimeout(savedBatchTimer);
+    savedBatchTimer = setTimeout(() => (savedBatch = 0), 6000);
+    const what = savedBatch === 1 ? info.fileName : formatCount(savedBatch);
+    showToast(
+      `${what} — ${getTranslation("savedToDownloads")}`,
+      getTranslation("showInFolder"),
+      () => window.easyShareDesktop.showInFolder(info.path),
+    );
+  });
+}
 
 burgerMenuBtn.addEventListener("click", () => {
   mobileQrModal.classList.remove("hidden");
@@ -627,7 +1058,8 @@ mobileQrClose.addEventListener("click", () => {
   (modal) => {
     modal.addEventListener("click", (e) => {
       if (e.target === modal) {
-        modal.classList.add("hidden");
+        if (modal === sendModal) closeSendModal();
+        else modal.classList.add("hidden");
       }
     });
   },
@@ -725,16 +1157,19 @@ function setCopyFeedback(btn) {
 }
 
 function formatBytes(bytes, decimals = 1) {
-  if (bytes === 0) return "0 Octet";
+  const sizes = getTranslation("sizeUnits").split(",");
+  if (!bytes || bytes <= 0) return "0 " + sizes[0];
   const k = 1024;
   const dm = decimals < 0 ? 0 : decimals;
-  const sizes = ["Octets", "Ko", "Mo", "Go", "To"];
-  const i = Math.floor(Math.log(bytes) / Math.log(k));
+  const i = Math.min(
+    sizes.length - 1,
+    Math.floor(Math.log(bytes) / Math.log(k)),
+  );
   return parseFloat((bytes / Math.pow(k, i)).toFixed(dm)) + " " + sizes[i];
 }
 
 function escapeHTML(str) {
-  return str.replace(
+  return String(str ?? "").replace(
     /[&<>'"]/g,
     (tag) =>
       ({

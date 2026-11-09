@@ -84,6 +84,7 @@ body {
   display: flex;
   flex-direction: column;
   height: 100vh;
+  height: 100dvh;
   position: relative;
   z-index: 2;
   pointer-events: none;
@@ -319,6 +320,8 @@ body {
 
 .main-viewport {
   flex: 1;
+  min-height: 0;
+  overflow-y: auto;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -515,6 +518,7 @@ body {
   align-items: center;
   justify-content: center;
   z-index: 1000;
+  padding: 1rem;
   opacity: 1;
   transition: opacity 0.25s ease;
 }
@@ -528,6 +532,8 @@ body {
   position: relative;
   width: 90%;
   max-width: 480px;
+  max-height: calc(100vh - 2rem);
+  max-height: calc(100dvh - 2rem);
   padding: 1.75rem 1.5rem;
   display: flex;
   flex-direction: column;
@@ -561,10 +567,21 @@ body {
   font-weight: 600;
 }
 
+.modal-header,
+.modal-footer {
+  flex-shrink: 0;
+}
+
 .modal-body {
   display: flex;
   flex-direction: column;
   gap: 1rem;
+  min-height: 0;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  /* room for the scrollbar without clipping focus rings */
+  margin: 0 -0.5rem;
+  padding: 0.15rem 0.5rem;
 }
 
 
@@ -1176,3 +1193,662 @@ textarea:focus {
 }
 
 
+
+/* ==========================================================
+   File sharing UI: grids, tiles, progress, lightbox, toast
+   ========================================================== */
+
+.send-card {
+  max-width: 560px;
+}
+
+.received-card {
+  max-width: 760px;
+}
+
+.received-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  padding-right: 2rem;
+}
+
+.received-header-text {
+  min-width: 0;
+}
+
+.modal-subtitle {
+  font-size: 0.78rem;
+  color: var(--text-secondary);
+  margin-top: 0.15rem;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.secondary-btn {
+  gap: 0.4rem;
+  padding: 0.5rem 0.85rem;
+  border-radius: 10px;
+  background: rgba(0, 113, 227, 0.08);
+  color: var(--primary-color);
+  font-size: 0.82rem;
+  font-weight: 600;
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+
+.secondary-btn:hover {
+  background: rgba(0, 113, 227, 0.14);
+}
+
+.secondary-btn svg {
+  width: 15px;
+  height: 15px;
+}
+
+.link-btn {
+  font-size: 0.75rem;
+  font-weight: 500;
+  color: var(--text-secondary);
+  padding: 0.2rem 0.4rem;
+  border-radius: 6px;
+}
+
+.link-btn:hover {
+  color: var(--danger-color);
+  background: rgba(255, 59, 48, 0.06);
+}
+
+.files-summary {
+  font-size: 0.78rem;
+  font-weight: 600;
+  color: var(--text-primary);
+}
+
+.received-texts {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.received-texts:empty {
+  display: none;
+}
+
+.text-card {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.text-card .received-text-body {
+  word-break: break-word;
+}
+
+.text-card .received-actions {
+  margin-top: 0;
+}
+
+/* ---------- grid ---------- */
+
+.file-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+  gap: 0.75rem;
+}
+
+.file-grid:empty {
+  display: none;
+}
+
+.file-grid-compact {
+  grid-template-columns: repeat(auto-fill, minmax(96px, 1fr));
+  gap: 0.5rem;
+}
+
+.file-tile {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  background: #f5f5f7;
+  border: 1px solid rgba(0, 0, 0, 0.04);
+  border-radius: 12px;
+  overflow: hidden;
+  animation: tile-in 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+@keyframes tile-in {
+  from {
+    opacity: 0;
+    transform: scale(0.96);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+.tile-thumb {
+  position: relative;
+  width: 100%;
+  aspect-ratio: 4 / 3;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: #e9e9ee;
+  overflow: hidden;
+  border-radius: 0;
+}
+
+.file-grid-compact .tile-thumb {
+  aspect-ratio: 1 / 1;
+}
+
+button.tile-thumb:hover img,
+button.tile-thumb:hover video {
+  transform: scale(1.04);
+}
+
+.tile-thumb img,
+.tile-thumb video {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+  transition: transform 0.3s ease;
+  pointer-events: none;
+}
+
+.tile-play {
+  position: absolute;
+  width: 38px;
+  height: 38px;
+  border-radius: 50%;
+  background: rgba(0, 0, 0, 0.55);
+  color: #fff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  backdrop-filter: blur(6px);
+  -webkit-backdrop-filter: blur(6px);
+}
+
+.file-grid-compact .tile-play {
+  width: 28px;
+  height: 28px;
+}
+
+.tile-play svg {
+  width: 45%;
+  height: 45%;
+  margin-left: 2px;
+}
+
+.tile-icon {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.35rem;
+  color: var(--text-secondary);
+}
+
+.tile-icon svg {
+  width: 34px;
+  height: 34px;
+}
+
+.file-grid-compact .tile-icon svg {
+  width: 26px;
+  height: 26px;
+}
+
+.tile-ext {
+  font-size: 0.62rem;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  padding: 0.1rem 0.35rem;
+  border-radius: 4px;
+  background: var(--text-secondary);
+  color: #fff;
+  max-width: 64px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.kind-pdf .tile-ext {
+  background: #e5484d;
+}
+.kind-archive .tile-ext {
+  background: #a26d1a;
+}
+.kind-audio .tile-ext {
+  background: #8e4ec6;
+}
+.kind-doc .tile-ext {
+  background: #2f6fde;
+}
+
+.tile-meta {
+  display: flex;
+  flex-direction: column;
+  gap: 0.05rem;
+  padding: 0.5rem 2.4rem 0.55rem 0.65rem;
+  min-width: 0;
+}
+
+.file-grid-compact .tile-meta {
+  padding: 0.35rem 0.45rem 0.4rem;
+}
+
+.tile-name {
+  font-size: 0.78rem;
+  font-weight: 500;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.file-grid-compact .tile-name {
+  font-size: 0.68rem;
+}
+
+.tile-size {
+  font-size: 0.68rem;
+  color: var(--text-secondary);
+}
+
+.file-grid-compact .tile-size {
+  font-size: 0.62rem;
+}
+
+.tile-action {
+  position: absolute;
+  right: 0.4rem;
+  bottom: 0.4rem;
+  width: 30px;
+  height: 30px;
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--primary-color);
+  background: #ffffff;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
+  text-decoration: none;
+  transition: all var(--transition-speed) ease;
+}
+
+.tile-action:hover {
+  background: var(--primary-color);
+  color: #fff;
+}
+
+.tile-action svg {
+  width: 15px;
+  height: 15px;
+}
+
+.tile-remove {
+  position: absolute;
+  top: 0.3rem;
+  right: 0.3rem;
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  background: rgba(0, 0, 0, 0.55);
+  color: #fff;
+  z-index: 2;
+  backdrop-filter: blur(6px);
+  -webkit-backdrop-filter: blur(6px);
+}
+
+.tile-remove:hover {
+  background: var(--danger-color);
+}
+
+.tile-remove svg {
+  width: 12px;
+  height: 12px;
+}
+
+/* upload states on compact tiles */
+.tile-progress {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  height: 4px;
+  background: rgba(0, 0, 0, 0.12);
+  display: none;
+}
+
+.tile-progress > div {
+  height: 100%;
+  width: 0;
+  background: var(--primary-color);
+  transition: width 0.15s linear;
+}
+
+.file-tile.is-uploading .tile-progress,
+.file-tile.is-done .tile-progress {
+  display: block;
+}
+
+.file-tile.is-done .tile-progress > div {
+  width: 100%;
+  background: var(--success-color);
+}
+
+.file-tile.is-error {
+  border-color: rgba(255, 59, 48, 0.5);
+}
+
+.file-tile.is-error .tile-size {
+  color: var(--danger-color);
+}
+
+.sending .file-tile.is-pending {
+  opacity: 0.55;
+}
+
+.sending .tile-remove {
+  display: none;
+}
+
+.sending .modal-drop-zone {
+  pointer-events: none;
+  opacity: 0.5;
+}
+
+.selected-files {
+  display: flex;
+  flex-direction: column;
+  gap: 0.6rem;
+}
+
+.selected-files-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+/* ---------- global upload progress ---------- */
+
+.upload-progress {
+  flex-shrink: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+}
+
+.upload-progress-text {
+  display: flex;
+  justify-content: space-between;
+  gap: 1rem;
+  font-size: 0.78rem;
+  font-weight: 500;
+  color: var(--text-secondary);
+}
+
+.upload-progress.has-error .upload-progress-text {
+  color: var(--danger-color);
+}
+
+.progress-track {
+  height: 6px;
+  border-radius: 999px;
+  background: rgba(0, 0, 0, 0.06);
+  overflow: hidden;
+}
+
+.progress-bar {
+  height: 100%;
+  width: 0;
+  border-radius: 999px;
+  background: var(--primary-color);
+  transition: width 0.15s linear;
+}
+
+/* ---------- progress ring on device bubbles ---------- */
+
+.bubble-node.uploading::before {
+  content: "";
+  position: absolute;
+  inset: -7px;
+  border-radius: 50%;
+  background: conic-gradient(
+    var(--primary-color) calc(var(--progress, 0) * 1%),
+    rgba(0, 113, 227, 0.12) 0
+  );
+  -webkit-mask: radial-gradient(farthest-side, transparent calc(100% - 4px), #000 calc(100% - 3px));
+  mask: radial-gradient(farthest-side, transparent calc(100% - 4px), #000 calc(100% - 3px));
+}
+
+/* ---------- lightbox ---------- */
+
+.lightbox {
+  position: fixed;
+  inset: 0;
+  z-index: 2000;
+  background: rgba(10, 10, 12, 0.92);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  -webkit-app-region: no-drag;
+}
+
+.lightbox-topbar {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  padding: 0.75rem 1rem;
+  padding-top: max(0.75rem, env(safe-area-inset-top));
+  color: #fff;
+  z-index: 2;
+}
+
+/* keep clear of the Electron window controls */
+@media (min-width: 769px) {
+  .lightbox-topbar {
+    top: 36px;
+  }
+}
+
+.lightbox-caption {
+  font-size: 0.85rem;
+  font-weight: 500;
+  opacity: 0.85;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.lightbox-actions {
+  display: flex;
+  gap: 0.5rem;
+  flex-shrink: 0;
+}
+
+.lightbox-btn,
+.lightbox-nav {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  color: #fff;
+  background: rgba(255, 255, 255, 0.12);
+  text-decoration: none;
+}
+
+.lightbox-btn:hover,
+.lightbox-nav:hover {
+  background: rgba(255, 255, 255, 0.24);
+}
+
+.lightbox-btn svg,
+.lightbox-nav svg {
+  width: 20px;
+  height: 20px;
+}
+
+.lightbox-nav {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  z-index: 2;
+}
+
+.lightbox-prev {
+  left: 1rem;
+}
+
+.lightbox-next {
+  right: 1rem;
+}
+
+.lightbox-stage {
+  width: 100%;
+  height: 100%;
+  padding: 6rem 4.5rem 2rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.lightbox-stage img,
+.lightbox-stage video {
+  max-width: 100%;
+  max-height: 100%;
+  border-radius: 8px;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
+  background: #000;
+}
+
+@media (max-width: 768px) {
+  .lightbox-stage {
+    padding: 4rem 0.5rem 5rem;
+  }
+
+  .lightbox-nav {
+    top: auto;
+    bottom: 1.25rem;
+    transform: none;
+  }
+}
+
+/* ---------- toast ---------- */
+
+.toast {
+  position: fixed;
+  left: 50%;
+  bottom: 1.5rem;
+  transform: translateX(-50%);
+  z-index: 3000;
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  max-width: calc(100% - 2rem);
+  padding: 0.65rem 0.75rem 0.65rem 1rem;
+  border-radius: 12px;
+  background: #1d1d1f;
+  color: #fff;
+  font-size: 0.82rem;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+  animation: toast-in 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.toast span {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.toast-action {
+  flex-shrink: 0;
+  padding: 0.3rem 0.6rem;
+  border-radius: 7px;
+  font-weight: 600;
+  color: #4da3ff;
+}
+
+.toast-action:hover {
+  background: rgba(255, 255, 255, 0.1);
+}
+
+@keyframes toast-in {
+  from {
+    opacity: 0;
+    transform: translate(-50%, 10px);
+  }
+  to {
+    opacity: 1;
+    transform: translate(-50%, 0);
+  }
+}
+
+@media (max-width: 600px) {
+  .file-grid {
+    grid-template-columns: repeat(auto-fill, minmax(130px, 1fr));
+  }
+
+  .received-header {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .received-header .secondary-btn {
+    align-self: flex-start;
+  }
+}
+
+/* once files are picked, the drop zone becomes a slim "add more" bar */
+.has-files .modal-drop-zone {
+  flex-direction: row;
+  padding: 0.7rem 1rem;
+}
+
+.has-files .modal-drop-zone svg {
+  width: 20px;
+  height: 20px;
+}
+
+.has-files textarea {
+  min-height: 64px;
+}
+
+@media (max-width: 600px) {
+  .modal-overlay {
+    padding: 0.75rem;
+  }
+
+  .modal-card {
+    width: 100%;
+    padding: 1.5rem 1rem 1.25rem;
+    gap: 1rem;
+  }
+
+  .file-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 0.6rem;
+  }
+
+  .file-grid-compact {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 0.45rem;
+  }
+
+  .tile-meta {
+    padding: 0.45rem 2.3rem 0.5rem 0.55rem;
+  }
+}

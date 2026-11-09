@@ -1,4 +1,16 @@
 const en = {
+  fileOne: "1 file",
+  fileMany: "{n} files",
+  downloadAll: "Download all",
+  clearAll: "Remove all",
+  sending: "Sending",
+  uploadFailed: "Upload failed",
+  uploadFailedShort: "Failed",
+  retryHint: "click Share to retry",
+  from: "From",
+  sizeUnits: "B,KB,MB,GB,TB",
+  savedToDownloads: "saved to Downloads",
+  showInFolder: "Show",
   connecting: "Connecting...",
   connected: "Connected",
   disconnected: "Disconnected",
@@ -36,6 +48,6 @@ const en = {
   troubleIntro: "If the other device cannot load the page, check the following points:",
   troubleItem1: '<svg class="trouble-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20h.01"/><path d="M8.5 16.5a5 5 0 0 1 7 0"/><path d="M5 13a10 10 0 0 1 14 0"/><path d="M1.5 9.5a15 15 0 0 1 21 0"/></svg><div><strong>Same Wi-Fi network</strong>: Make sure both devices are connected to the exact same local/Wi-Fi network.</div>',
   troubleItem2: '<svg class="trouble-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="18" height="12" x="3" y="4" rx="2" ry="2"/><line x1="2" x2="22" y1="20" y2="20"/><line x1="5" x2="19" y1="16" y2="16"/><line x1="12" x2="12" y1="16" y2="20"/></svg><div><strong>Mac & iPhone (Local Network)</strong>: On macOS/iOS, ensure "Local Network" access is enabled for your browser (System Settings > Privacy & Security > Local Network).</div>',
-  troubleItem3: '<svg class="trouble-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg><div><strong>Firewall/VPN</strong>: Temporarily disable any active VPN or firewall on the host machine that might block incoming connections on port 3000.</div>',
+  troubleItem3: '<svg class="trouble-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg><div><strong>Firewall/VPN</strong>: Temporarily disable any active VPN or firewall on the host machine that might block incoming connections on port {port}.</div>',
   troubleItem4: '<svg class="trouble-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M12 2a14.5 14.5 0 0 0 0 20 14.5 14.5 0 0 0 0-20"/><path d="M2 12h20"/></svg><div><strong>IP Address</strong>: The host machine must be awake and the server running. If your router changed your local IP address, restart the server to refresh the link.</div>'
 };

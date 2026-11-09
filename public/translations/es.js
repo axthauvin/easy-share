@@ -1,4 +1,16 @@
 const es = {
+  fileOne: "1 archivo",
+  fileMany: "{n} archivos",
+  downloadAll: "Descargar todo",
+  clearAll: "Quitar todo",
+  sending: "Enviando",
+  uploadFailed: "Error al enviar",
+  uploadFailedShort: "Error",
+  retryHint: "pulsa Compartir para reintentar",
+  from: "De",
+  sizeUnits: "B,KB,MB,GB,TB",
+  savedToDownloads: "guardado en Descargas",
+  showInFolder: "Mostrar",
   connecting: "Conectando...",
   connected: "Conectado",
   disconnected: "Desconectado",
@@ -36,6 +48,6 @@ const es = {
   troubleIntro: "Si el otro dispositivo no puede cargar la página, comprueba lo siguiente:",
   troubleItem1: '<svg class="trouble-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20h.01"/><path d="M8.5 16.5a5 5 0 0 1 7 0"/><path d="M5 13a10 10 0 0 1 14 0"/><path d="M1.5 9.5a15 15 0 0 1 21 0"/></svg><div><strong>Misma red Wi-Fi</strong>: Asegúrate de que ambos dispositivos estén conectados a la misma red local o Wi-Fi.</div>',
   troubleItem2: '<svg class="trouble-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="18" height="12" x="3" y="4" rx="2" ry="2"/><line x1="2" x2="22" y1="20" y2="20"/><line x1="5" x2="19" y1="16" y2="16"/><line x1="12" x2="12" y1="16" y2="20"/></svg><div><strong>Mac e iPhone (Red local)</strong>: En macOS/iOS, asegúrate de habilitar el acceso a la "Red local" para tu navegador (Ajustes del Sistema > Privacidad y seguridad > Red local).</div>',
-  troubleItem3: '<svg class="trouble-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg><div><strong>Firewall/VPN</strong>: Desactiva temporalmente cualquier VPN o firewall activo en la máquina host que pueda bloquear conexiones entrantes en el puerto 3000.</div>',
+  troubleItem3: '<svg class="trouble-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg><div><strong>Firewall/VPN</strong>: Desactiva temporalmente cualquier VPN o firewall activo en la máquina host que pueda bloquear conexiones entrantes en el puerto {port}.</div>',
   troubleItem4: '<svg class="trouble-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M12 2a14.5 14.5 0 0 0 0 20 14.5 14.5 0 0 0 0-20"/><path d="M2 12h20"/></svg><div><strong>Dirección IP</strong>: El host debe estar encendido y el servidor ejecutándose. Si tu router cambió tu IP local, reinicia el servidor para actualizar el enlace.</div>'
 };

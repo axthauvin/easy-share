@@ -1,4 +1,16 @@
 const de = {
+  fileOne: "1 Datei",
+  fileMany: "{n} Dateien",
+  downloadAll: "Alle herunterladen",
+  clearAll: "Alle entfernen",
+  sending: "Senden",
+  uploadFailed: "Senden fehlgeschlagen",
+  uploadFailedShort: "Fehler",
+  retryHint: "zum Wiederholen auf Teilen klicken",
+  from: "Von",
+  sizeUnits: "B,KB,MB,GB,TB",
+  savedToDownloads: "in Downloads gespeichert",
+  showInFolder: "Anzeigen",
   connecting: "Verbinde...",
   connected: "Verbunden",
   disconnected: "Getrennt",
@@ -36,6 +48,6 @@ const de = {
   troubleIntro: "Wenn das andere Gerät die Seite nicht laden kann, prüfen Sie Folgendes:",
   troubleItem1: '<svg class="trouble-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20h.01"/><path d="M8.5 16.5a5 5 0 0 1 7 0"/><path d="M5 13a10 10 0 0 1 14 0"/><path d="M1.5 9.5a15 15 0 0 1 21 0"/></svg><div><strong>Gleiches WLAN-Netzwerk</strong>: Stellen Sie sicher, dass beide Geräte mit demselben lokalen WLAN-Netzwerk verbunden sind.</div>',
   troubleItem2: '<svg class="trouble-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="18" height="12" x="3" y="4" rx="2" ry="2"/><line x1="2" x2="22" y1="20" y2="20"/><line x1="5" x2="19" y1="16" y2="16"/><line x1="12" x2="12" y1="16" y2="20"/></svg><div><strong>Mac & iPhone (Lokales Netzwerk)</strong>: Stellen Sie unter macOS/iOS sicher, dass der Zugriff auf das "Lokale Netzwerk" für Ihren Browser aktiviert ist (Systemeinstellungen > Datenschutz & Sicherheit > Lokales Netzwerk).</div>',
-  troubleItem3: '<svg class="trouble-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg><div><strong>Firewall/VPN</strong>: Deaktivieren Sie vorübergehend aktive VPNs oder Firewalls auf dem Host-Rechner, die eingehende Verbindungen auf Port 3000 blockieren könnten.</div>',
+  troubleItem3: '<svg class="trouble-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg><div><strong>Firewall/VPN</strong>: Deaktivieren Sie vorübergehend aktive VPNs oder Firewalls auf dem Host-Rechner, die eingehende Verbindungen auf Port {port} blockieren könnten.</div>',
   troubleItem4: '<svg class="trouble-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M12 2a14.5 14.5 0 0 0 0 20 14.5 14.5 0 0 0 0-20"/><path d="M2 12h20"/></svg><div><strong>IP-Adresse</strong>: Der Host-Rechner muss eingeschaltet und der Server aktiv sein. Wenn Ihr Router die lokale IP geändert hat, starten Sie den Server neu.</div>'
 };

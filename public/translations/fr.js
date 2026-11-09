@@ -1,4 +1,16 @@
 const fr = {
+  fileOne: "1 fichier",
+  fileMany: "{n} fichiers",
+  downloadAll: "Tout télécharger",
+  clearAll: "Tout retirer",
+  sending: "Envoi",
+  uploadFailed: "Échec de l'envoi",
+  uploadFailedShort: "Échec",
+  retryHint: "cliquez sur Partager pour réessayer",
+  from: "De",
+  sizeUnits: "o,Ko,Mo,Go,To",
+  savedToDownloads: "enregistré dans Téléchargements",
+  showInFolder: "Afficher",
   connecting: "Connexion...",
   connected: "Connecté",
   disconnected: "Déconnecté",
@@ -36,6 +48,6 @@ const fr = {
   troubleIntro: "Si l'autre appareil ne parvient pas à charger la page, vérifiez les points suivants :",
   troubleItem1: '<svg class="trouble-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20h.01"/><path d="M8.5 16.5a5 5 0 0 1 7 0"/><path d="M5 13a10 10 0 0 1 14 0"/><path d="M1.5 9.5a15 15 0 0 1 21 0"/></svg><div><strong>Même réseau Wi-Fi</strong> : Assurez-vous que les deux appareils sont connectés exactement au même réseau local / Wi-Fi.</div>',
   troubleItem2: '<svg class="trouble-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="18" height="12" x="3" y="4" rx="2" ry="2"/><line x1="2" x2="22" y1="20" y2="20"/><line x1="5" x2="19" y1="16" y2="16"/><line x1="12" x2="12" y1="16" y2="20"/></svg><div><strong>Mac & iPhone (Réseau Local)</strong> : Sur macOS/iOS, assurez-vous que l\'accès au "Réseau Local" est activé pour votre navigateur (Paramètres Système > Confidentialité et sécurité > Réseau local).</div>',
-  troubleItem3: '<svg class="trouble-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg><div><strong>Pare-feu/VPN</strong> : Désactivez temporairement tout VPN ou pare-feu actif sur l\'hôte qui pourrait bloquer les connexions entrantes sur le port 3000.</div>',
+  troubleItem3: '<svg class="trouble-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg><div><strong>Pare-feu/VPN</strong> : Désactivez temporairement tout VPN ou pare-feu actif sur l\'hôte qui pourrait bloquer les connexions entrantes sur le port {port}.</div>',
   troubleItem4: '<svg class="trouble-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M12 2a14.5 14.5 0 0 0 0 20 14.5 14.5 0 0 0 0-20"/><path d="M2 12h20"/></svg><div><strong>Adresse IP</strong> : L\'hôte doit être allumé et le serveur actif. Si votre routeur a changé votre adresse IP locale, relancez le serveur pour mettre à jour le lien.</div>'
 };

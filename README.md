@@ -26,7 +26,7 @@ To install Easy-Share as a native application on your desktop:
 2. Download the installer matching your operating system:
    - **Windows**: The `.exe` file (classic NSIS installer with setup wizard, directory selection, and desktop shortcut option).
    - **macOS**: The `.dmg` or `.zip` file.
-   - **Linux**: The `.deb` package or `.AppImage` file.
+   - **Linux**: The `.deb` package (Debian/Ubuntu), the `.rpm` package (Fedora/RHEL: `sudo dnf install ./easy-share-*.rpm`) or the `.AppImage` file.
 3. Launch the application. It will automatically start the local server and open a clean window.
 4. To connect another device (like a smartphone), simply scan the QR code displayed on the screen while connected to the same Wi-Fi network, it will open the Easy-Share web interface in your mobile browser.
 
@@ -52,10 +52,16 @@ pnpm electron # or npm run electron
 
 ### Compile & build installers
 
-To package and generate native installers (NSIS, DMG, DEB) for your current platform:
+To package and generate native installers (NSIS, DMG, DEB, RPM) for your current platform:
 
 ```bash
 pnpm run build # or npm run build
+```
+
+To build only the Fedora/RHEL `.rpm` package (requires `rpm-build`: `sudo dnf install rpm-build`):
+
+```bash
+pnpm run build:rpm # or npm run build:rpm
 ```
 
 You will find the generated distribution files in the `/dist` directory.

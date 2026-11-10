@@ -11,7 +11,8 @@
     "test": "echo \"Error: no test specified\" && exit 1",
     "dev": "node server.js",
     "electron": "electron .",
-    "build": "electron-builder"
+    "build": "electron-builder",
+    "build:rpm": "bash scripts/build-rpm.sh"
   },
   "dependencies": {
     "express": "^4.19.2",

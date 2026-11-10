@@ -30,6 +30,10 @@ jobs:
         with:
           version: 11
 
+      - name: Install rpm tooling (Linux)
+        if: runner.os == 'Linux'
+        run: sudo apt-get update && sudo apt-get install -y rpm
+
       - name: Install Dependencies
         run: pnpm install --frozen-lockfile
 
@@ -37,6 +41,10 @@ jobs:
         run: pnpm exec electron-builder
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Build RPM package (Linux)
+        if: runner.os == 'Linux'
+        run: bash scripts/build-rpm.sh --skip-package
 
       - name: Create Release and Upload Assets
         uses: softprops/action-gh-release@v2
@@ -52,12 +60,13 @@ jobs:
             Download the `.dmg` or `.zip` file, open it, and drag Easy-Share to your Applications folder.
 
             **Linux :**
-            Download the `.deb` package (for Debian/Ubuntu) or the standalone `.AppImage` file.
+            Download the `.deb` package (for Debian/Ubuntu), the `.rpm` package (for Fedora/RHEL, install with `sudo dnf install ./easy-share-*.rpm`) or the standalone `.AppImage` file.
           files: |
             dist/*.exe
             dist/*.dmg
             dist/*.zip
             dist/*.deb
+            dist/*.rpm
             dist/*.AppImage
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
